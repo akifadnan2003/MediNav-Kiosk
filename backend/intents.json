@@ -1,0 +1,10 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "keywords": ["hello", "hi", "assalam o alaikum", "hey"],
+      "response_en": "Welcome to the hospital. How can I help you find your way today?",
+      "response_ur": "السلام علیکم۔ ہسپتال میں خوش آمدید۔ میں آج آپ کی کس طرح مدد کر سکتا ہوں؟"
+    }
+  ]
+}
