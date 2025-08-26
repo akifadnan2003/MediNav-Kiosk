@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediNav Avatar Demo</title>
+    <!-- TensorFlow.js and Handpose Model Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eaf0f0;
+        }
+        #kiosk-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        /* Camera and Canvas for debugging (can be hidden in production) */
+        #video, #canvas {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 160px;
+            height: 120px;
+            border-radius: 10px;
+            transform: scaleX(-1); /* Mirror view */
+        }
+        #canvas {
+            z-index: 10;
+        }
+        #status-box {
+            position: absolute;
+            top: 140px;
+            left: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        /* Avatar Styling and Animation */
+        #avatar-container {
+            width: 300px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+        }
+        #avatar {
+            width: 150px;
+            height: 250px;
+            background-color: #385050;
+            border-radius: 75px 75px 0 0;
+            position: relative;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Smooth, bouncy transition */
+        }
+        #avatar::before { /* Head */
+            content: '';
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background-color: #d4e0e0;
+            border-radius: 50%;
+        }
+
+        /* Avatar States */
+        #avatar.idle {
+            height: 150px; /* Sitting height */
+        }
+        #avatar.active {
+            height: 300px; /* Standing height */
+        }
+
+        /* Greeting Text Styling */
+        #greeting-text {
+            position: absolute;
+            bottom: 20px;
+            background: white;
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out 0.5s, transform 0.5s ease-out 0.5s;
+        }
+        #greeting-text.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #greeting-en {
+            font-size: 1.5em;
+            color: #385050;
+        }
+        #greeting-ur {
+            font-family: 'Noto Nastaliq Urdu', serif;
+            font-size: 1.8em;
+            color: #385050;
+        }
+    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&display=swap">
+</head>
+<body>
+    <div id="kiosk-container">
+        <!-- Debugging views -->
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+        <div id="status-box">Initializing...</div>
+
+        <!-- Main Scene -->
+        <div id="avatar-container">
+            <div id="avatar" class="idle"></div>
+            <div id="greeting-text">
+                <p id="greeting-en">Hello! How can I help you?</p>
+                <p id="greeting-ur" dir="rtl">ہیلو! میں آپ کی کس طرح مدد کر سکتا ہوں؟</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusBox = document.getElementById('status-box');
+        const avatar = document.getElementById('avatar');
+        const greetingText = document.getElementById('greeting-text');
+
+        let model = null;
+        let isActivated = false;
+        let activationTimeout = null;
+
+        // --- Text-to-Speech ---
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US'; // Can be changed for other languages if supported
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- Main Application Logic ---
+        async function main() {
+            statusBox.textContent = "Loading Handpose model...";
+            model = await handpose.load();
+            statusBox.textContent = "Requesting camera access...";
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.addEventListener('loadeddata', () => {
+                    statusBox.textContent = "Scanning for hand...";
+                    detectHand();
+                });
+            } catch (err) {
+                statusBox.textContent = "Camera access denied.";
+                console.error("Camera access denied:", err);
+            }
+        }
+
+        // --- Hand Detection Loop ---
+        async function detectHand() {
+            if (isActivated) return; // Stop detecting once activated
+
+            // Get video properties
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            video.width = videoWidth;
+            video.height = videoHeight;
+            canvas.width = videoWidth;
+            canvas.height = videoHeight;
+
+            // Detect hands
+            const predictions = await model.estimateHands(video);
+            ctx.clearRect(0, 0, videoWidth, videoHeight);
+
+            if (predictions.length > 0) {
+                statusBox.textContent = "Hand Detected!";
+                // For this demo, any hand detection will trigger the activation
+                activateKiosk();
+                
+                // Draw landmarks for debugging
+                predictions.forEach(prediction => {
+                    const landmarks = prediction.landmarks;
+                    landmarks.forEach(landmark => {
+                        ctx.beginPath();
+                        ctx.arc(landmark[0], landmark[1], 5, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#008080';
+                        ctx.fill();
+                    });
+                });
+            } else {
+                statusBox.textContent = "Scanning for hand...";
+            }
+
+            // Loop
+            requestAnimationFrame(detectHand);
+        }
+        
+        // --- Kiosk Activation ---
+        function activateKiosk() {
+            if (isActivated) return;
+            isActivated = true;
+            
+            console.log("Kiosk Activated!");
+            statusBox.textContent = "Activated!";
+
+            // 1. Animate the avatar
+            avatar.classList.remove('idle');
+            avatar.classList.add('active');
+
+            // 2. Show the greeting text
+            greetingText.classList.add('visible');
+
+            // 3. Speak the greeting
+            speak("Hello! How can I help you?");
+            
+            // 4. Set a timeout to reset the kiosk after a period of inactivity
+            clearTimeout(activationTimeout);
+            activationTimeout = setTimeout(resetKiosk, 15000); // Reset after 15 seconds
+        }
+
+        function resetKiosk() {
+            console.log("Resetting Kiosk.");
+            isActivated = false;
+            avatar.classList.remove('active');
+            avatar.classList.add('idle');
+            greetingText.classList.remove('visible');
+            statusBox.textContent = "Scanning for hand...";
+            requestAnimationFrame(detectHand); // Start scanning again
+        }
+
+        main();
+    </script>
+</body>
+</html>

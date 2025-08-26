@@ -1,0 +1,416 @@
+/* frontend/src/App.css */
+
+
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: #eaf0f0;
+    color: #385050;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+.kiosk-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #e8f4f8;
+    z-index: 0;
+}
+
+.avatar-video-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+    display: block;
+}
+
+.avatar-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: 1;
+}
+
+.avatar-video.visible {
+    opacity: 1;
+}
+
+/* --- 3D Avatar Screen Layouts --- */
+.welcome-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.greeting-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.welcome-overlay, .greeting-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.welcome-overlay .welcome-text,
+.greeting-overlay .greeting-box {
+    pointer-events: auto;
+}
+
+.welcome-text {
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-out 1.5s;
+    max-width: 90vw;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.35); /* even more transparent */
+    padding: 24px 40px;
+    border-radius: 18px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    pointer-events: auto;
+}
+
+.welcome-text.visible {
+    opacity: 1;
+}
+
+.welcome-text h2 {
+    font-size: 2.5em;
+    font-weight: 300;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.greeting-box {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.35); /* even more transparent */
+    padding: 32px 48px 40px 48px;
+    border-radius: 22px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+    max-width: 90vw;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    pointer-events: auto;
+}
+
+.greeting-box.visible {
+    opacity: 1;
+}
+
+.greeting-en {
+    font-size: 2.2em;
+    font-weight: 300;
+    margin-bottom: 18px;
+    color: #2c3e50;
+}
+
+.mic-button {
+    background-color: #385050;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(56, 80, 80, 0.3);
+    margin: 0 auto;
+}
+
+.mic-button:hover {
+    background-color: #2a3b3b;
+    transform: scale(1.05);
+}
+
+/* --- Camera and Status Styles --- */
+.camera-container {
+    position: fixed;
+    top: 32px;
+    left: 32px;
+    width: 220px;
+    height: 140px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    z-index: 10;
+    background: rgba(255,255,255,0.18);
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.camera-view {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+}
+
+.status-box {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 1em;
+    color: #fff;
+    background: rgba(44,62,80,0.55);
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    padding: 2px 0 4px 0;
+    pointer-events: none;
+}
+
+/* --- Video Avatar Styles --- */
+.avatar-video-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    top: 30px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1;
+}
+
+.avatar-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+}
+
+.avatar-video.visible {
+    opacity: 1;
+}
+
+/* --- UI Overlay Styles --- */
+.ui-overlay {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    height: auto;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 2;
+    pointer-events: none;
+    padding-bottom: 48px;
+    background: none;
+}
+
+.ui-overlay > * {
+    pointer-events: auto;
+}
+
+.welcome-text, .greeting-box {
+    background: rgba(255,255,255,0.08); /* nearly fully transparent */
+    box-shadow: none;
+}
+
+/* Other screen styles (Listening, Processing, etc.) */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.screen:not(.welcome-screen):not(.greeting-screen) {
+    background-color: #eaf0f0; /* Solid background for non-avatar screens */
+}
+
+.logo.small { 
+    position: absolute; 
+    top: 40px; 
+    left: 40px; 
+    width: 100px; 
+    z-index: 10;
+}
+
+.listening-animation { 
+    width: 200px; 
+    height: 200px; 
+    border-radius: 50%; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    animation: pulse 1.5s infinite ease-in-out; 
+}
+
+.listening-circle { 
+    width: 100%; 
+    height: 100%; 
+    border: 15px solid #385050; 
+    border-radius: 50%; 
+    opacity: 0.5; 
+}
+
+@keyframes pulse { 
+    0% { 
+        transform: scale(0.95); 
+        box-shadow: 0 0 0 0 rgba(56, 80, 80, 0.7); 
+    } 
+    70% { 
+        transform: scale(1); 
+        box-shadow: 0 0 0 30px rgba(56, 80, 80, 0); 
+    } 
+    100% { 
+        transform: scale(0.95); 
+        box-shadow: 0 0 0 0 rgba(56, 80, 80, 0); 
+    } 
+}
+
+.status-text { 
+    margin-top: 40px; 
+    font-size: 1.8em; 
+    text-align: center; 
+    line-height: 1.4; 
+}
+
+.processing-content { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+.processing-animation { 
+    color: #385050; 
+    font-size: 12em; 
+    font-weight: 200; 
+}
+
+.dots-animation { 
+    font-size: 4em; 
+    margin-top: -30px; 
+}
+
+.dots-animation span { 
+    animation: blink 1.4s infinite both; 
+}
+
+.dots-animation span:nth-child(2) { 
+    animation-delay: 0.2s; 
+}
+
+.dots-animation span:nth-child(3) { 
+    animation-delay: 0.4s; 
+}
+
+@keyframes blink { 
+    0%, 80%, 100% { 
+        opacity: 0; 
+    } 
+    40% { 
+        opacity: 1; 
+    } 
+}
+
+.response-box { 
+    background-color: white; 
+    width: 80%; 
+    max-width: 800px; 
+    padding: 60px 40px 40px 40px; 
+    border-radius: 20px; 
+    position: relative; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    text-align: center; 
+}
+
+.response-check { 
+    position: absolute; 
+    top: -35px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    background-color: #385050; 
+    color: white; 
+    width: 70px; 
+    height: 70px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 2.5em; 
+    border: 5px solid #eaf0f0; 
+}
+
+.response-check.error { 
+    background-color: #c46262; 
+}
+
+.response-text { 
+    font-size: 1.6em; 
+    margin: 15px 0; 
+    color: #333; 
+    line-height: 1.5; 
+}
+
+.ask-another-btn { 
+    background-color: #385050; 
+    color: white; 
+    border: none; 
+    border-radius: 50px; 
+    padding: 20px 40px; 
+    font-size: 1.2em; 
+    cursor: pointer; 
+    margin-top: 30px; 
+    transition: background-color 0.2s ease-in-out; 
+}
+
+.ask-another-btn:hover { 
+    background-color: #2a3b3b; 
+}
+
+.welcome-text h2, .greeting-en, .option-button, .sub-options h3, .status-text {
+    text-shadow: 5px 0 6px #120101, 0 0 2px #070101, 1px 1px 0 #0e0101, -1px -1px 0 #fff;
+    -webkit-text-stroke: 1px #ffffff;
+}

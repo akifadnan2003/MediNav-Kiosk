@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediNav 3D Avatar Demo</title>
+    <!-- TensorFlow.js and Handpose Model Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
+    <!-- Three.js and GSAP (for animation) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #eaf0f0; }
+        #kiosk-container { width: 100%; height: 100%; position: relative; }
+        #three-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        /* Camera view for debugging */
+        #video { position: absolute; top: 20px; right: 20px; width: 160px; height: 120px; border-radius: 10px; transform: scaleX(-1); border: 3px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        #status-box { position: absolute; top: 180px; right: 20px; background: rgba(0,0,0,0.6); color: white; padding: 5px 10px; border-radius: 5px; font-size: 14px; }
+        /* Greeting Text */
+        #greeting-box {
+            position: absolute;
+            top: 25%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-out;
+            color: #385050;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        #greeting-box.visible { opacity: 1; }
+        #greeting-box h1 { font-size: 2.5em; font-weight: 300; margin-bottom: 20px; }
+        #mic-button { background-color: #385050; color: white; border: none; border-radius: 50%; width: 150px; height: 150px; font-size: 1.5em; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="kiosk-container">
+        <canvas id="three-canvas"></canvas>
+        <video id="video" autoplay playsinline muted></video>
+        <div id="status-box">Initializing...</div>
+        <div id="greeting-box">
+            <h1>Hello! How can I help you?</h1>
+            <button id="mic-button">Tap to Speak</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const video = document.getElementById('video');
+        const statusBox = document.getElementById('status-box');
+        const greetingBox = document.getElementById('greeting-box');
+
+        // --- State Variables ---
+        let handposeModel = null;
+        let isActivated = false;
+        let activationTimeout = null;
+
+        // --- Three.js Scene Setup ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('three-canvas'),
+            alpha: true, // Transparent background
+            antialias: true 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 10, 7.5);
+        scene.add(directionalLight);
+
+        camera.position.z = 5;
+
+        // --- Create 3D Avatar ---
+        const avatar = new THREE.Group();
+        const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0x385050 });
+        const headMaterial = new THREE.MeshStandardMaterial({ color: 0xd4e0e0 });
+
+        // Body Parts
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.7, 1, 4, 16), bodyMaterial);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.5, 32, 32), headMaterial);
+        head.position.y = 1.5;
+        
+        avatar.add(body);
+        avatar.add(head);
+        scene.add(avatar);
+
+        // --- Animation Logic (GSAP) ---
+        // Initial "idle" state
+        gsap.set(avatar.position, { x: -window.innerWidth / 200, y: -2, z: 0 }); // Off to the left and sitting
+        gsap.set(avatar.rotation, { z: -Math.PI / 8 }); // Tilted slightly
+
+        function animateToActive() {
+            // Stand up and walk to center
+            gsap.to(avatar.position, {
+                x: 0,
+                y: -1.5,
+                z: 0,
+                duration: 1.5,
+                ease: "power2.inOut"
+            });
+            gsap.to(avatar.rotation, {
+                z: 0,
+                duration: 1.5,
+                ease: "power2.inOut"
+            });
+        }
+
+        function animateToIdle() {
+            // Sit down and walk to the side
+            gsap.to(avatar.position, {
+                x: -window.innerWidth / 200,
+                y: -2,
+                z: 0,
+                duration: 1.5,
+                ease: "power2.inOut"
+            });
+            gsap.to(avatar.rotation, {
+                z: -Math.PI / 8,
+                duration: 1.5,
+                ease: "power2.inOut"
+            });
+        }
+        
+        // --- Main Render Loop ---
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- Hand Detection Logic ---
+        async function main() {
+            statusBox.textContent = "Loading Handpose model...";
+            handposeModel = await handpose.load();
+            statusBox.textContent = "Requesting camera...";
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                video.addEventListener('loadeddata', () => {
+                    statusBox.textContent = "Scanning for hand...";
+                    detectHand();
+                });
+            } catch (err) {
+                statusBox.textContent = "Camera access denied.";
+            }
+        }
+
+        async function detectHand() {
+            if (isActivated) return;
+
+            const predictions = await handposeModel.estimateHands(video);
+            if (predictions.length > 0) {
+                statusBox.textContent = "Hand Detected!";
+                activateKiosk();
+            }
+            
+            requestAnimationFrame(detectHand);
+        }
+        
+        // --- Kiosk State Management ---
+        function activateKiosk() {
+            if (isActivated) return;
+            isActivated = true;
+            
+            statusBox.textContent = "Activated!";
+            animateToActive(); // Trigger the 3D animation
+
+            // Show greeting after a delay
+            setTimeout(() => {
+                greetingBox.classList.add('visible');
+                // In a real app, you'd trigger the backend TTS here
+            }, 1500);
+            
+            clearTimeout(activationTimeout);
+            activationTimeout = setTimeout(resetKiosk, 15000); // Reset after 15s
+        }
+
+        function resetKiosk() {
+            isActivated = false;
+            greetingBox.classList.remove('visible');
+            animateToIdle(); // Go back to idle animation
+            statusBox.textContent = "Scanning for hand...";
+            requestAnimationFrame(detectHand);
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        main();
+    </script>
+</body>
+</html>
