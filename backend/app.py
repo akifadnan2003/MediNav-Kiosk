@@ -1,81 +1,114 @@
 # backend/app.py
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO
 import json
-import vosk
-import sys
+import torch
+from transformers import pipeline
+import numpy as np
+import sys 
+from pydub import AudioSegment
+import io
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-very-secret-key!' 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# --- VOSK MODEL SETUP ---
-# Define the path to your English model folder
-MODEL_PATH = "models/vosk-en" 
-# The sample rate of the model (usually 16000)
-SAMPLE_RATE = 16000
-
-# Check if the model path exists, otherwise exit
+# --- LOAD MODELS ---
 try:
-    model = vosk.Model(MODEL_PATH)
-except Exception:
-    print(f"Error: Could not load model from path '{MODEL_PATH}'.")
-    print("Please make sure you have downloaded the model and placed it in the correct folder.")
+    # This line will now detect your GPU if PyTorch was installed correctly
+    device = 0 if torch.cuda.is_available() else -1
+    print(f"✅ [Backend] PyTorch CUDA available: {torch.cuda.is_available()}")
+    print(f"✅ [Backend] Using device: {'cuda:0' if device == 0 else 'cpu'}")
+    
+    model_path = "./models/whisper-large-v2/"
+    print(f"✅ [Backend] Loading Whisper model from: {model_path}")
+    
+    transcriber = pipeline(
+        "automatic-speech-recognition",
+        model=model_path,
+        device=device
+    )
+    
+    with open('intents.json', 'r', encoding='utf-8') as f:
+        intents_data = json.load(f)["intents"]
+    
+    print("✅ [Backend] All models loaded successfully.")
+except Exception as e:
+    print(f"❌ [Backend] Fatal Error loading models: {e}")
     sys.exit(1)
 
-# A dictionary to hold a separate recognizer for each connected client
-recognizers = {}
+# --- HELPER FUNCTIONS ---
+def process_intent(text):
+    for intent in intents_data:
+        if intent['tag'] == 'fallback':
+            continue
+        for keyword in intent["keywords"]:
+            if keyword in text.lower().strip():
+                print(f"✅ [Backend] Found keyword '{keyword}' for intent '{intent['tag']}'")
+                return intent
+    print("⚠️ [Backend] No intent matched, returning fallback.")
+    return next((i for i in intents_data if i['tag'] == 'fallback'), None)
 
-@app.route('/')
-def index():
-    return "MediNav Backend Server is running."
+def transcribe_audio(audio_bytes):
+    audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+    audio_segment = audio_segment.set_frame_rate(16000)
+    audio_segment = audio_segment.set_channels(1)
+    samples = np.array(audio_segment.get_array_of_samples()).astype(np.float32) / 32768.0
+    
+    if len(samples) == 0:
+        return ""
 
+    result = transcriber(samples)
+    return result["text"]
+
+# --- BACKGROUND TASK ---
+def process_audio_task(sid, audio_bytes):
+    try:
+        transcribed_text = transcribe_audio(audio_bytes)
+        clean_text = transcribed_text.strip()
+        print(f"📝 [Task {sid}] Transcription: '{clean_text}'")
+
+        if clean_text:
+            matched_intent = process_intent(clean_text)
+            if matched_intent:
+                response = matched_intent['response_en']
+                socketio.emit('response', {'response_en': response}, to=sid)
+        else:
+            fallback_intent = next((i for i in intents_data if i['tag'] == 'fallback'), None)
+            if fallback_intent:
+                socketio.emit('fallback_response', {'response_en': fallback_intent['response_en']}, to=sid)
+    except Exception as e:
+        print(f"❌ [Task {sid}] An error occurred: {e}")
+
+# --- SOCKET.IO EVENTS ---
 @socketio.on('connect')
 def handle_connect():
-    """A new client has connected. Create a new recognizer for them."""
-    print(f'Client connected: {request.sid}')
-    # Create a new KaldiRecognizer for this session and store it
-    recognizers[request.sid] = vosk.KaldiRecognizer(model, SAMPLE_RATE)
+    print(f'✅ [Backend] Client connected: {request.sid}')
 
-@socketio.on('disconnect')
-def handle_disconnect():
-    """A client has disconnected. Remove their recognizer."""
-    print(f'Client disconnected: {request.sid}')
-    # Clean up the recognizer for the disconnected client
-    if request.sid in recognizers:
-        del recognizers[request.sid]
+@socketio.on('process_audio')
+def handle_process_audio(data):
+    audio_bytes = data['audio_data']
+    socketio.start_background_task(target=process_audio_task, sid=request.sid, audio_bytes=audio_bytes)
 
-@socketio.on('audio_stream')
-def handle_audio_stream(audio_data):
-    """Process the incoming audio stream from a client."""
-    recognizer = recognizers.get(request.sid)
-    if not recognizer:
-        print(f"Warning: No recognizer found for client {request.sid}")
-        return
-
-    # Feed the audio data to the recognizer
-    if recognizer.AcceptWaveform(audio_data):
-        # The recognizer has a final result
-        result = json.loads(recognizer.Result())
-        text = result.get('text', '')
-        print(f"Transcription result for {request.sid}: {text}")
-
-        # --- MOCKUP NLP LOGIC (to be replaced later) ---
-        # For now, we just send the transcribed text back.
-        # In the future, we will do intent matching here.
-        if text:
-            response = {
-                "response_en": f"I heard you say: '{text}'",
-                "response_ur": "" # No Urdu response yet
-            }
-            socketio.emit('response', response, to=request.sid)
-    # else:
-    #     # The recognizer has a partial result (optional to process)
-    #     # partial_result = json.loads(recognizer.PartialResult())
-    #     # print(f"Partial result: {partial_result.get('partial', '')}")
-
+# --- TEST ROUTE FOR DIRECT TRANSCRIPTION ---
+@app.route('/test_transcribe', methods=['POST'])
+def test_transcribe():
+    if 'audio' not in request.files:
+        return jsonify({'error': 'No audio file provided'}), 400
+    
+    audio_file = request.files['audio']
+    audio_bytes = audio_file.read()
+    
+    try:
+        print("✅ [Test Route] Received audio file. Starting transcription.")
+        text = transcribe_audio(audio_bytes)
+        print(f"✅ [Test Route] Transcription successful: '{text}'")
+        return jsonify({'transcription': text})
+    except Exception as e:
+        print(f"❌ [Test Route] Error during transcription: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print("Starting Flask-SocketIO server on http://localhost:5001")
-    socketio.run(app, host='0.0.0.0', port=5001, debug=True)
+    print("🚀 [Backend] Starting Flask-SocketIO server...")
+    # --- THIS IS THE FIX ---
+    socketio.run(app, host='0.0.0.0', port=5001)

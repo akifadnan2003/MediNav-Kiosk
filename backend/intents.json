@@ -2,9 +2,43 @@
   "intents": [
     {
       "tag": "greeting",
-      "keywords": ["hello", "hi", "assalam o alaikum", "hey"],
-      "response_en": "Welcome to the hospital. How can I help you find your way today?",
-      "response_ur": "السلام علیکم۔ ہسپتال میں خوش آمدید۔ میں آج آپ کی کس طرح مدد کر سکتا ہوں؟"
+      "keywords": ["hello", "hi", "hey", "good morning", "good afternoon"],
+      "response_en": "Welcome to the hospital. How can I help you find your way today?"
+    },
+    {
+      "tag": "find_cardiology",
+      "keywords": ["cardiology", "heart", "cardiac"],
+      "response_en": "The Cardiology Department is on the 3rd Floor in Wing B."
+    },
+    {
+      "tag": "find_ophthalmology",
+      "keywords": ["ophthalmology", "eye", "vision", "eyesight"],
+      "response_en": "The Eye Department (Ophthalmology) is on the 1st Floor, next to the main staircase."
+    },
+    {
+      "tag": "find_radiology",
+      "keywords": ["radiology", "x-ray", "xray", "scan", "mri", "ct scan"],
+      "response_en": "Radiology and Imaging is located in the Basement. Please take the main elevators down."
+    },
+    {
+      "tag": "find_emergency",
+      "keywords": ["emergency", "casualty", "er"],
+      "response_en": "The Emergency Department has a separate entrance at the back of the hospital. Please follow the red signs."
+    },
+    {
+      "tag": "find_pharmacy",
+      "keywords": ["pharmacy", "medicine", "chemist", "drug store"],
+      "response_en": "The 24/7 Pharmacy is on the Ground Floor, right next to the main entrance."
+    },
+    {
+      "tag": "visiting_hours",
+      "keywords": ["visiting", "hours", "timings", "meet", "see", "patient"],
+      "response_en": "Visiting hours for most wards are from 4:00 PM to 6:00 PM."
+    },
+    {
+      "tag": "fallback",
+      "keywords": [],
+      "response_en": "Sorry, I couldn't quite understand that. Please try speaking again, or use the buttons below."
     }
   ]
 }
