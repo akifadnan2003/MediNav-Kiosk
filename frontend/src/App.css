@@ -411,6 +411,6 @@ body, html {
 }
 
 .welcome-text h2, .greeting-en, .option-button, .sub-options h3, .status-text {
-    text-shadow: 5px 0 6px #120101, 0 0 2px #070101, 1px 1px 0 #0e0101, -1px -1px 0 #fff;
-    -webkit-text-stroke: 1px #ffffff;
+    text-shadow: 5px 0 6px #edf7f8, 0 0 2px #070101, 1px 1px 0 #bdb2b2, -1px -1px 0 #fbfbfb;
+    -webkit-text-stroke: 1px #0e0404;
 }

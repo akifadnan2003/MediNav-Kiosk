@@ -7,18 +7,18 @@ import AvatarScreen from './AvatarScreen';
 const SERVER_URL = 'http://localhost:5001';
 const RECORDING_DURATION = 5000;
 
-// --- Video URLs ---
+// Video Sources
 const idleVideoURL = "/videos/idle_loop.mp4";
 const activateVideoURL = "/videos/stand_up_and_walk.mp4";
 const greetingVideoURL = "/videos/greeting_loop.mp4";
 
-// --- Components ---
+// Screen
 const ListeningScreen = () => ( <div className="screen"><div className="listening-animation"></div><p className="status-text">Listening...</p></div> );
 const ProcessingScreen = () => ( <div className="screen"><div className="processing-animation">+</div><p className="status-text">Processing...</p></div> );
 const ResponseScreen = ({ response, onReset }) => ( <div className="screen"><div className="response-box"><div>✓</div><p>{response.response_en}</p></div><button onClick={onReset} className="ask-another-btn">Ask Another Question</button></div> );
 const FallbackScreen = ({ response, onReset }) => ( <div className="screen"><div className="response-box error"><div>!</div><p>{response.response_en}</p></div><button onClick={onReset} className="ask-another-btn">Try Again</button></div> );
 
-// --- Main App Component ---
+// Main App
 function App() {
   const [appState, setAppState] = useState('welcome');
   const [welcomeKey, setWelcomeKey] = useState(0);
@@ -69,8 +69,43 @@ function App() {
       activationTimeoutRef.current = setTimeout(handleReset, 15000);
   };
 
-  const startRecording = async () => {
-    // ... (This function remains the same as before)
+ const startRecording = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorderRef.current = new MediaRecorder(stream);
+        
+        mediaRecorderRef.current.ondataavailable = (event) => {
+            audioChunksRef.current.push(event.data);
+        };
+
+        mediaRecorderRef.current.onstop = () => {
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+                const arrayBuffer = reader.result;
+                socket.emit('process_audio', { audio_data: arrayBuffer });
+            };
+            reader.readAsArrayBuffer(audioBlob);
+
+            audioChunksRef.current = [];
+            stream.getTracks().forEach(track => track.stop());
+        };
+
+        audioChunksRef.current = [];
+        mediaRecorderRef.current.start();
+        setAppState('listening');
+
+        setTimeout(() => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+                mediaRecorderRef.current.stop();
+                setAppState('processing');
+            }
+        }, RECORDING_DURATION);
+
+    } catch (error) {
+        console.error("Error accessing microphone:", error);
+        setAppState('welcome');
+    }
   };
 
   const handleStartSpeaking = () => {

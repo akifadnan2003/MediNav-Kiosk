@@ -89,7 +89,7 @@ def handle_connect():
 def handle_process_audio(data):
     audio_bytes = data['audio_data']
     socketio.start_background_task(target=process_audio_task, sid=request.sid, audio_bytes=audio_bytes)
-    
+
 #Just for testing purposes, using this as an alternative for microphone
 @app.route('/test_transcribe', methods=['POST'])
 def test_transcribe():
@@ -110,5 +110,4 @@ def test_transcribe():
 
 if __name__ == '__main__':
     print("🚀 [Backend] Starting Flask-SocketIO server...")
-    # --- THIS IS THE FIX ---
     socketio.run(app, host='0.0.0.0', port=5001)
