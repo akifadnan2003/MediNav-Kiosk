@@ -15,7 +15,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 # --- LOAD MODELS ---
 try:
-    # This line will now detect your GPU if PyTorch was installed correctly
+    #Using GPU i.e NVIDIA 3050ti
     device = 0 if torch.cuda.is_available() else -1
     print(f"✅ [Backend] PyTorch CUDA available: {torch.cuda.is_available()}")
     print(f"✅ [Backend] Using device: {'cuda:0' if device == 0 else 'cpu'}")
@@ -37,7 +37,7 @@ except Exception as e:
     print(f"❌ [Backend] Fatal Error loading models: {e}")
     sys.exit(1)
 
-# --- HELPER FUNCTIONS ---
+
 def process_intent(text):
     for intent in intents_data:
         if intent['tag'] == 'fallback':
@@ -80,7 +80,7 @@ def process_audio_task(sid, audio_bytes):
     except Exception as e:
         print(f"❌ [Task {sid}] An error occurred: {e}")
 
-# --- SOCKET.IO EVENTS ---
+#Server Connection
 @socketio.on('connect')
 def handle_connect():
     print(f'✅ [Backend] Client connected: {request.sid}')
@@ -89,8 +89,8 @@ def handle_connect():
 def handle_process_audio(data):
     audio_bytes = data['audio_data']
     socketio.start_background_task(target=process_audio_task, sid=request.sid, audio_bytes=audio_bytes)
-
-# --- TEST ROUTE FOR DIRECT TRANSCRIPTION ---
+    
+#Just for testing purposes, using this as an alternative for microphone
 @app.route('/test_transcribe', methods=['POST'])
 def test_transcribe():
     if 'audio' not in request.files:
