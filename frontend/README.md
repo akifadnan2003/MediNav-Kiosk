@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# MediNav Kiosk
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+![MediNav Logo](frontend/public/assets/medinav_logo.png)
 
-## Available Scripts
+**An offline, AI-powered kiosk designed to assist hospital visitors with interactive navigation and information. This project was developed as part of an internship at KSOFT in Islamabad.**
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🌟 Core Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* **Gesture-Activated Avatar:** The kiosk waits in an idle state. A user can activate it simply by waving their hand at the camera.
+* **Animated Video Avatar:** A high-quality, pre-rendered video avatar creates an engaging and lifelike user experience, greeting the user and guiding them through the interaction.
+* **Offline Speech Recognition:** Utilizes OpenAI's powerful Whisper model to transcribe user speech with high accuracy, running entirely on the kiosk's local hardware.
+* **Intelligent Intent Recognition:** A robust backend processes the user's query to understand their goal (e.g., finding a department, asking for visiting hours).
+* **Real-time & Responsive:** Built with a modern full-stack architecture for a smooth, seamless user experience without lag.
+* **100% Offline:** All AI models (Hand Detection, Speech Recognition) are run locally, making the kiosk completely independent of any internet connection.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## 🛠️ Tech Stack
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This project is a decoupled full-stack application, combining a powerful Python backend with a modern React frontend.
 
-### `npm run build`
+### Backend
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+* **Framework:** Flask & Flask-SocketIO
+* **Speech Recognition:** OpenAI Whisper (via Hugging Face Transformers)
+* **Audio Processing:** PyDub & FFmpeg
+* **Core AI Library:** PyTorch (with CUDA support for GPU acceleration)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Frontend
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* **Framework:** React.js
+* **Gesture Recognition:** TensorFlow.js (Handpose Model)
+* **Real-time Communication:** Socket.IO Client
+* **Styling:** CSS3 with responsive design
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 🚀 Getting Started
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Follow these instructions to get the project running on your local machine for development and testing.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Prerequisites
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+* Python 3.9+
+* Node.js and npm
+* Git
+* **FFmpeg:** Must be installed on your system and accessible from the command line.
+* **(Optional but Recommended)** An NVIDIA GPU with CUDA installed for fast transcription.
 
-## Learn More
+### Installation & Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/akifadnan2003/MediNav-Kiosk.git](https://github.com/akifadnan2003/MediNav-Kiosk.git)
+    cd MediNav-Kiosk
+    ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2.  **Setup the Backend:**
+    ```bash
+    # Navigate to the backend folder
+    cd backend
 
-### Code Splitting
+    # Create and activate a virtual environment
+    python -m venv venv
+    .\venv\Scripts\activate
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+    # Install Python dependencies
+    # For GPU support (NVIDIA):
+    pip install torch torchvision torchaudio --index-url [https://download.pytorch.org/whl/cu121](https://download.pytorch.org/whl/cu121)
+    # For CPU-only:
+    # pip install torch
+    
+    pip install Flask Flask-SocketIO eventlet transformers pydub
+    ```
 
-### Analyzing the Bundle Size
+3.  **Setup the Frontend:**
+    ```bash
+    # Navigate to the frontend folder
+    cd ../frontend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+    # Install Node.js dependencies
+    npm install
 
-### Making a Progressive Web App
+    # Install TensorFlow.js packages for hand detection
+    npm install @tensorflow/tfjs-core @tensorflow/tfjs-converter @tensorflow/tfjs-backend-webgl @tensorflow-models/handpose
+    ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+4.  **Download AI Models:**
+    * Download the **Whisper-base.en** model from [Hugging Face](https://huggingface.co/openai/whisper-base.en/tree/main).
+    * Create a folder `backend/models/whisper-base-en/`.
+    * Place all the downloaded model files into this folder.
 
-### Advanced Configuration
+5.  **Add Video Assets:**
+    * Create a folder `frontend/public/videos/`.
+    * Place three `.mp4` files inside, named exactly: `idle_loop.mp4`, `stand_up_and_walk.mp4`, and `greeting_loop.mp4`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Running the Application
 
-### Deployment
+You need to run the backend and frontend servers simultaneously in two separate terminals.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+1.  **Start the Backend Server:**
+    * Open a terminal, navigate to the `backend` folder, and activate the virtual environment.
+    * Run the server:
+        ```bash
+        python app.py
+        ```
 
-### `npm run build` fails to minify
+2.  **Start the Frontend Server:**
+    * Open a **second** terminal and navigate to the `frontend` folder.
+    * Run the React development server:
+        ```bash
+        npm start
+        ```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Your browser should automatically open to `http://localhost:3000`, where the application will be running.
