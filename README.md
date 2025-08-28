@@ -1,6 +1,5 @@
 # MediNav Kiosk
 
-![MediNav Logo](frontend/public/assets/medinav_logo.png)
 
 **An offline, AI-powered kiosk designed to assist hospital visitors with interactive navigation and information. This project was developed as part of an internship at KSOFT in Islamabad.**
 
