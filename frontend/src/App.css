@@ -100,9 +100,9 @@ body, html {
 }
 
 .welcome-text h2 {
-    font-size: 2.5em;
-    font-weight: 300;
-    color: #2c3e50;
+    font-size: 4.5em;
+    font-weight: 600;
+    color: #1b3958;
     margin: 0;
 }
 
@@ -128,10 +128,10 @@ body, html {
 }
 
 .greeting-en {
-    font-size: 2.2em;
-    font-weight: 300;
-    margin-bottom: 18px;
-    color: #2c3e50;
+    font-size: 4.2em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #055972;
 }
 
 .mic-button {
@@ -176,6 +176,7 @@ body, html {
     height: 100%;
     object-fit: cover;
     border-radius: 18px;
+    transform: scaleX(-1);
 }
 
 .status-box {
@@ -226,7 +227,7 @@ body, html {
 /* --- UI Overlay Styles --- */
 .ui-overlay {
     position: fixed;
-    left: 0;
+    left: 45px;
     bottom: 0;
     width: 100vw;
     height: auto;
@@ -237,7 +238,7 @@ body, html {
     align-items: center;
     z-index: 2;
     pointer-events: none;
-    padding-bottom: 48px;
+    padding-bottom: 98px;
     background: none;
 }
 

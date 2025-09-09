@@ -49,36 +49,67 @@ def process_intent(text):
     print("⚠️ [Backend] No intent matched, returning fallback.")
     return next((i for i in intents_data if i['tag'] == 'fallback'), None)
 
-def transcribe_audio(audio_bytes):
+def transcribe_audio(audio_bytes, language="en"):
+    """
+    Decodes the incoming audio, converts it to the correct format, and transcribes it.
+    """
     audio_segment = AudioSegment.from_file(io.BytesIO(audio_bytes))
+    print(f"✅ [Backend] Decoded audio. Original Frame Rate: {audio_segment.frame_rate}, Channels: {audio_segment.channels}, Duration: {len(audio_segment)}ms")
     audio_segment = audio_segment.set_frame_rate(16000)
     audio_segment = audio_segment.set_channels(1)
+    audio_segment = audio_segment.normalize()
+    print(f"✅ [Backend] Converted audio to 16kHz Mono and normalized.")
     samples = np.array(audio_segment.get_array_of_samples()).astype(np.float32) / 32768.0
-    
+    audio_duration = len(samples) / 16000
+    max_amplitude = np.max(np.abs(samples)) if len(samples) > 0 else 0
+    print(f"🔍 [Backend] Audio analysis - Duration: {audio_duration:.2f}s, Max amplitude: {max_amplitude:.3f}, Samples: {len(samples)}")
     if len(samples) == 0:
+        print("⚠️ [Backend] Audio contains no samples after decoding.")
         return ""
-
-    result = transcriber(samples)
+    if audio_duration < 0.1:
+        print("⚠️ [Backend] Audio too short (< 0.1s)")
+        return ""
+    if max_amplitude < 0.01:
+        print("⚠️ [Backend] Audio level too low")
+        return ""
+    print(f"✅ [Backend] Starting transcription with Whisper model (language={language})...")
+    result = transcriber(samples, generate_kwargs={
+        "repetition_penalty": 1.1,
+        "no_repeat_ngram_size": 2,
+        "max_length": 448,
+        "temperature": 0.1,
+        "do_sample": False,
+        "use_cache": True,
+        "language": language
+    })
+    print("✅ [Backend] Transcription finished.")
     return result["text"]
 
-# --- BACKGROUND TASK ---
-def process_audio_task(sid, audio_bytes):
+# my custom logic
+def process_audio_task(sid, audio_bytes, language="en"):
+    print(f"✅ [Task {sid}] Starting audio processing in background.")
     try:
-        transcribed_text = transcribe_audio(audio_bytes)
+        transcribed_text = transcribe_audio(audio_bytes, language)
         clean_text = transcribed_text.strip()
         print(f"📝 [Task {sid}] Transcription: '{clean_text}'")
-
         if clean_text:
             matched_intent = process_intent(clean_text)
             if matched_intent:
-                response = matched_intent['response_en']
+                response = matched_intent.get('response_en') or matched_intent.get('response_ur') or "No response found."
+                print(f"🚀 [Task {sid}] Sending response to client.")
                 socketio.emit('response', {'response_en': response}, to=sid)
+            else:
+                print(f"⚠️ [Task {sid}] No intent matched, sending fallback.")
+                fallback_intent = next((i for i in intents_data if i.get('response_en') or i.get('response_ur')), None)
+                if fallback_intent:
+                    socketio.emit('fallback_response', {'response_en': fallback_intent.get('response_en') or fallback_intent.get('response_ur')}, to=sid)
         else:
-            fallback_intent = next((i for i in intents_data if i['tag'] == 'fallback'), None)
+            print(f"⚠️ [Task {sid}] Empty transcription, sending fallback.")
+            fallback_intent = next((i for i in intents_data if i.get('response_en') or i.get('response_ur')), None)
             if fallback_intent:
-                socketio.emit('fallback_response', {'response_en': fallback_intent['response_en']}, to=sid)
+                socketio.emit('fallback_response', {'response_en': fallback_intent.get('response_en') or fallback_intent.get('response_ur')}, to=sid)
     except Exception as e:
-        print(f"❌ [Task {sid}] An error occurred: {e}")
+        print(f"❌ [Task {sid}] An error occurred during background audio processing: {e}")
 
 #Server Connection
 @socketio.on('connect')
@@ -87,8 +118,11 @@ def handle_connect():
 
 @socketio.on('process_audio')
 def handle_process_audio(data):
+    print("🎤 [Backend] 'process_audio' event received. Starting background task.")
     audio_bytes = data['audio_data']
-    socketio.start_background_task(target=process_audio_task, sid=request.sid, audio_bytes=audio_bytes)
+    language = data.get('language', 'en')
+    socketio.start_background_task(target=process_audio_task, sid=request.sid, audio_bytes=audio_bytes, language=language)
+    print("✅ [Backend] Background task started. Server is free.")
 
 #Just for testing purposes, using this as an alternative for microphone
 @app.route('/test_transcribe', methods=['POST'])

@@ -1,44 +1,220 @@
 {
   "intents": [
     {
-      "tag": "greeting",
-      "keywords": ["hello", "hi", "hey", "good morning", "good afternoon"],
-      "response_en": "Welcome to the hospital. How can I help you find your way today?"
+      "tag": "hospital_name",
+      "keywords": ["name", "hospital", "aviceena", "medical", "complex", "naam", "aspataal"],
+      "response_en": "This is Aviceena Medical Complex.",
+      "response_ur": "یہ ایویسینا میڈیکل کمپلیکس ہے۔"
     },
     {
-      "tag": "find_cardiology",
-      "keywords": ["cardiology", "heart", "cardiac"],
-      "response_en": "The Cardiology Department is on the 3rd Floor in Wing B."
+      "tag": "find_pathology",
+      "keywords": ["pathology", "pathology department"],
+      "response_en": "The Pathology Department is on the Ground Floor, Tower 2.",
+      "response_ur": "پیتھالوجی ڈیپارٹمنٹ ٹاور 2، گراؤنڈ فلور پر ہے۔"
     },
     {
-      "tag": "find_ophthalmology",
-      "keywords": ["ophthalmology", "eye", "vision", "eyesight"],
-      "response_en": "The Eye Department (Ophthalmology) is on the 1st Floor, next to the main staircase."
+      "tag": "find_laboratory",
+      "keywords": ["laboratory", "lab", "laboratory kahan hai"],
+      "response_en": "The Laboratory is on the Ground Floor, Tower 2.",
+      "response_ur": "لیبارٹری ٹاور 2، گراؤنڈ فلور پر ہے۔"
+    },
+    {
+      "tag": "procedure_blood_test",
+      "keywords": ["blood test", "blood", "doctor advised me blood test", "khoon ka test"],
+      "response_en": "To get a blood test, please go to the ground floor of Tower 2 to the sample collection desk.",
+      "response_ur": "خون کے ٹیسٹ کے لیے، براہ کرم ٹاور 2 کے گراؤنڈ فلور پر نمونہ جمع کرنے والی ڈیسک پر جائیں۔"
+    },
+    {
+      "tag": "procedure_urine_test",
+      "keywords": ["urine test", "urine", "doctor advised me urine test", "peshab ka test"],
+      "response_en": "For a urine test, please collect the container from pathology reception and hand in the filled sample.",
+      "response_ur": "پیشاب کے ٹیسٹ کے لیے، براہ کرم پیتھالوجی ریسپشن سے کنٹینر لے کر بھرا ہوا نمونہ جمع کروائیں۔"
+    },
+    {
+      "tag": "procedure_donate_blood",
+      "keywords": ["donate blood", "blood bank", "khoon dena hai"],
+      "response_en": "The blood bank is located on the ground floor of Tower 2.",
+      "response_ur": "بلڈ بینک ٹاور 2 کے گراؤنڈ فلور پر واقع ہے۔"
     },
     {
       "tag": "find_radiology",
-      "keywords": ["radiology", "x-ray", "xray", "scan", "mri", "ct scan"],
-      "response_en": "Radiology and Imaging is located in the Basement. Please take the main elevators down."
+      "keywords": ["radiology", "radiology department"],
+      "response_en": "The Radiology Department handles services like X-Rays, CT Scans, and MRIs. It is located on the ground and first floors of Tower 1. Do you need the location for a specific test?",
+      "response_ur": "ریڈیالوجی ڈیپارٹمنٹ ایکس رے، سی ٹی اسکین، اور ایم آر آئی جیسی خدمات انجام دیتا ہے۔ یہ ٹاور 1 کے گراؤنڈ اور پہلی منزل پر واقع ہے۔ کیا آپ کو کسی مخصوص ٹیسٹ کے لیے جگہ کی ضرورت ہے؟"
+    },
+    {
+      "tag": "procedure_xray",
+      "keywords": ["x-ray", "xray", "x-ray kahan hota hai"],
+      "response_en": "For an X-Ray, please go to the ground floor of Tower 3.",
+      "response_ur": "ایکس رے کے لیے، براہ کرم ٹاور 3 کے گراؤنڈ فلور پر جائیں۔"
+    },
+    {
+      "tag": "procedure_ct_scan",
+      "keywords": ["ct scan", "ct"],
+      "response_en": "For a CT Scan, please go to the ground floor of Tower 3.",
+      "response_ur": "سی ٹی اسکین کے لیے، براہ کرم ٹاور 3 کے گراؤنڈ فلور پر جائیں۔"
+    },
+    {
+      "tag": "procedure_mri",
+      "keywords": ["mri"],
+      "response_en": "For an MRI, please go to the ground floor of Tower 3.",
+      "response_ur": "ایم آر آئی کے لیے، براہ کرم ٹاور 3 کے گراؤنڈ فلور پر جائیں۔"
+    },
+    {
+      "tag": "find_restrooms",
+      "keywords": ["restrooms", "washrooms", "bathrooms", "toilet", "washroom kahan hai"],
+      "response_en": "Restrooms are located on the ground floor of Tower 2 and the seventh floor of Tower 1.",
+      "response_ur": "واش رومز ٹاور 2 کے گراؤنڈ فلور اور ٹاور 1 کی ساتویں منزل پر واقع ہیں۔"
     },
     {
       "tag": "find_emergency",
-      "keywords": ["emergency", "casualty", "er"],
-      "response_en": "The Emergency Department has a separate entrance at the back of the hospital. Please follow the red signs."
+      "keywords": ["emergency", "emergency room", "hadsa"],
+      "response_en": "The Emergency Room is on the ground floor of Tower 3.",
+      "response_ur": "ایمرجنسی روم ٹاور 3 کے گراؤنڈ فلور پر ہے۔"
+    },
+    {
+      "tag": "procedure_check_bp",
+      "keywords": ["bp", "blood pressure", "bp check"],
+      "response_en": "You can get your Blood Pressure checked on the third floor of Tower 2.",
+      "response_ur": "آپ اپنا بلڈ پریشر ٹاور 2 کی تیسری منزل پر چیک کروا سکتے ہیں۔"
+    },
+    {
+      "tag": "procedure_check_blood_sugar",
+      "keywords": ["blood sugar", "sugar", "sugar check"],
+      "response_en": "You can get your Blood Sugar checked on the seventh floor of Tower 1.",
+      "response_ur": "آپ اپنا بلڈ شوگر ٹاور 1 کی ساتویں منزل پر چیک کروا سکتے ہیں۔"
+    },
+    {
+      "tag": "find_cafeteria",
+      "keywords": ["cafeteria", "food", "cafe", "khanay ki jagah"],
+      "response_en": "The Cafeteria is located on the second floor of Tower 2.",
+      "response_ur": "کیفے ٹیریا ٹاور 2 کی دوسری منزل پر واقع ہے۔"
+    },
+    {
+      "tag": "info_visiting_hours",
+      "keywords": ["visiting hours", "visiting", "meet patient", "timings", "milne ka time"],
+      "response_en": "Visiting hours are open 24/7.",
+      "response_ur": "مریضوں سے ملنے کے اوقات 24 گھنٹے کھلے ہیں۔"
+    },
+    {
+      "tag": "info_parking",
+      "keywords": ["parking", "park", "gari kahan park karun"],
+      "response_en": "Parking for patients is available in front of the hospital. Public parking is also available.",
+      "response_ur": "مریضوں کے لیے پارکنگ ہسپتال کے سامنے دستیاب ہے۔ پبلک پارکنگ بھی دستیاب ہے۔"
+    },
+    {
+      "tag": "procedure_get_test_results",
+      "keywords": ["test results", "my results", "report", "reports kahan milengi"],
+      "response_en": "For pathology results, go to the pathology reception on the ground floor of Tower 2. For radiology results, go to the radiology reception on the second and third floors of Tower 3.",
+      "response_ur": "پیتھالوجی کے نتائج کے لیے، ٹاور 2 کے گراؤنڈ فلور پر پیتھالوجی ریسپشن پر جائیں۔ ریڈیالوجی کے نتائج کے لیے، ٹاور 3 کی دوسری اور تیسری منزل پر ریڈیالوجی ریسپشن پر جائیں۔"
+    },
+    {
+      "tag": "procedure_get_vaccinated",
+      "keywords": ["vaccinated", "vaccination", "vaccine", " टीका"],
+      "response_en": "The vaccination room is on the ground floor of Tower 3, in front of the Pharmacy.",
+      "response_ur": "ویکسینیشن روم ٹاور 3 کے گراؤنڈ فلور پر، فارمیسی کے سامنے ہے۔"
+    },
+    {
+      "tag": "procedure_birth_certificate",
+      "keywords": ["birth certificate", "birth", "paidaish ka certificate"],
+      "response_en": "For a Birth Certificate, please go to the admin office on the fourth floor of Tower 2.",
+      "response_ur": "پیدائشی سرٹیفکیٹ کے لیے، براہ کرم ٹاور 2 کی چوتھی منزل پر ایڈمن آفس جائیں۔"
+    },
+    {
+      "tag": "procedure_discharge",
+      "keywords": ["discharge", "getting discharge", "chutti"],
+      "response_en": "For discharge procedures, please go to the ground floor main reception in the morning. In the evening, go to the ground floor main reception of Tower 2. For day time medical cases, go to the ground floor main reception of Tower 3.",
+      "response_ur": "ڈسچارج کے طریقہ کار کے لیے، صبح گراؤنڈ فلور کے مین ریسپشن پر جائیں۔ شام میں، ٹاور 2 کے گراؤنڈ فلور کے مین ریسپشن پر جائیں۔ دن کے وقت طبی معاملات کے لیے، ٹاور 3 کے گراؤنڈ فلور کے مین ریسپشن پر جائیں۔"
+    },
+    {
+      "tag": "procedure_submit_payment",
+      "keywords": ["payment", "submit payment", "pay", "paise kahan jama karaun"],
+      "response_en": "To submit a payment, please go to the ground floor main reception in the morning. In the evening, go to the ground floor main reception of Tower 2 or the mess office on the second floor.",
+      "response_ur": "ادائیگی جمع کرانے کے لیے، براہ کرم صبح گراؤنڈ فلور کے مین ریسپشن پر جائیں۔ شام میں، ٹاور 2 کے گراؤنڈ فلور کے مین ریسپشن پر یا دوسری منزل پر میس آفس میں جائیں۔"
+    },
+    {
+      "tag": "procedure_get_appointment",
+      "keywords": ["appointment", "get appointment", "time lena hai"],
+      "response_en": "For a radiology appointment, please go to the radiology reception on the ground floor of Tower 1.",
+      "response_ur": "ریڈیالوجی اپائنٹمنٹ کے لیے، براہ کرم ٹاور 1 کے گراؤنڈ فلور پر ریڈیالوجی ریسپشن پر جائیں۔"
+    },
+    {
+      "tag": "find_registration_desk",
+      "keywords": ["registration", "registration desk", "register"],
+      "response_en": "The main registration desk is on the ground floor of Tower 3.",
+      "response_ur": "مرکزی رجسٹریشن ڈیسک ٹاور 3 کے گراؤنڈ فلور پر ہے۔"
+    },
+    {
+      "tag": "procedure_cancel_appointment",
+      "keywords": ["cancel appointment", "refund", "appointment cancel"],
+      "response_en": "There is no advance, so you can simply reschedule your appointment.",
+      "response_ur": "کوئی ایڈوانس نہیں ہے، لہذا آپ آسانی سے اپنی اپائنٹمنٹ کو دوبارہ شیڈول کر سکتے ہیں۔"
+    },
+    {
+      "tag": "info_room_rates",
+      "keywords": ["room rate", "room charges", "vip room", "private room", "ward", "kamre ka किराया"],
+      "response_en": "VIP rooms are 15,000, Single rooms are 8,000, Double rooms are 4,000, and the Ward is 2,000. Shared rooms are 7,000.",
+      "response_ur": "وی آئی پی کمرے 15,000، سنگل کمرے 8,000، ڈبل کمرے 4,000، اور وارڈ 2,000 کے ہیں۔ مشترکہ کمرے 7,000 کے ہیں۔"
+    },
+    {
+      "tag": "info_consultancy_charges",
+      "keywords": ["consultancy charges", "consultancy", "doctor fees", "doctor ki fees"],
+      "response_en": "Consultancy charges are 2,000.",
+      "response_ur": "کنسلٹنسی چارجز 2,000 ہیں۔"
+    },
+    {
+      "tag": "find_lifts",
+      "keywords": ["lifts", "elevator", "lift kahan hai"],
+      "response_en": "Lifts are located in front of the radio department on the right side of Tower 1, on the ground floor of Tower 2 in front of KSOFT, and on the ground floor of Tower 3 on the right side.",
+      "response_ur": "لفٹیں ٹاور 1 کے دائیں جانب ریڈیو ڈیپارٹمنٹ کے سامنے، ٹاور 2 کے گراؤنڈ فلور پر KSOFT کے سامنے، اور ٹاور 3 کے گراؤنڈ فلور پر دائیں جانب واقع ہیں۔"
+    },
+    {
+      "tag": "find_mosque",
+      "keywords": ["mosque", "prayer", "namaz", "masjid"],
+      "response_en": "The mosque is located at Tower 3, B1. The female prayer area is at L1, Tower 3.",
+      "response_ur": "مسجد ٹاور 3، B1 میں واقع ہے۔ خواتین کے لیے نماز کی جگہ L1، ٹاور 3 میں ہے۔"
+    },
+    {
+      "tag": "procedure_get_ambulance",
+      "keywords": ["ambulance", "ambulance chahiye"],
+      "response_en": "To get an ambulance, please call. Charges are 1600 within 20km, and 70rs per km beyond that.",
+      "response_ur": "ایمبولینس حاصل کرنے کے لیے، براہ کرم کال کریں۔ 20 کلومیٹر کے اندر چارجز 1600 ہیں، اور اس سے آگے 70 روپے فی کلومیٹر ہیں۔"
     },
     {
       "tag": "find_pharmacy",
-      "keywords": ["pharmacy", "medicine", "chemist", "drug store"],
-      "response_en": "The 24/7 Pharmacy is on the Ground Floor, right next to the main entrance."
+      "keywords": ["pharmacy", "medical store"],
+      "response_en": "The Pharmacy is on the ground floor of Tower 2, in front of Ram. There is another new pharmacy on the ground floor of Tower 3.",
+      "response_ur": "فارمیسی ٹاور 2 کے گراؤنڈ فلور پر، رام کے سامنے ہے۔ ٹاور 3 کے گراؤنڈ فلور پر ایک اور نئی فارمیسی بھی ہے۔"
     },
     {
-      "tag": "visiting_hours",
-      "keywords": ["visiting", "hours", "timings", "meet", "see", "patient"],
-      "response_en": "Visiting hours for most wards are from 4:00 PM to 6:00 PM."
+      "tag": "procedure_annual_medical",
+      "keywords": ["annual medical", "annual checkup", "salana checkup"],
+      "response_en": "For the annual medical procedure, please go to B1, Tower 2.",
+      "response_ur": "سالانہ طبی معائنے کے لیے، براہ کرم B1، ٹاور 2 پر جائیں۔"
+    },
+    {
+      "tag": "procedure_dependency_list",
+      "keywords": ["dependency list", "dependency"],
+      "response_en": "To check your dependency list, please go to the fourth floor of Tower 2.",
+      "response_ur": "اپنی انحصاری کی فہرست چیک کرنے کے لیے، براہ کرم ٹاور 2 کی چوتھی منزل پر جائیں۔"
+    },
+    {
+      "tag": "procedure_death_certificate",
+      "keywords": ["death certificate", "death", "maut ka certificate"],
+      "response_en": "For a death certificate, please go to the fourth floor of Tower 2.",
+      "response_ur": "ڈیتھ سرٹیفکیٹ کے لیے، براہ کرم ٹاور 2 کی چوتھی منزل پر جائیں۔"
+    },
+    {
+      "tag": "find_mortuary",
+      "keywords": ["mortuary", "morgue"],
+      "response_en": "The mortuary is available. The per night charges are 8,000.",
+      "response_ur": "مردہ خانہ دستیاب ہے۔ فی رات کے چارجز 8,000 ہیں۔"
     },
     {
       "tag": "fallback",
       "keywords": [],
-      "response_en": "Sorry, I couldn't quite understand that. Please try speaking again, or use the buttons below."
+      "response_en": "Sorry, I couldn't understand that. Please try speaking again, or use the buttons below for assistance.",
+      "response_ur": "معذرت، میں سمجھ نہیں سکا۔ براہ کرم دوبارہ بولنے کی کوشش کریں، یا مدد کے لیے نیچے دیے گئے بٹنوں کا استعمال کریں۔"
     }
   ]
 }
